@@ -79,36 +79,64 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================
-  // 3. MOBILE MENU TOGGLE
+  // 3. MOBILE MENU TOGGLE & BACKDROP
   // ==========================================
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const closeMobileMenuBtn = document.getElementById('closeMobileMenuBtn');
   const navMenu = document.getElementById('navMenu');
+  const navBackdrop = document.getElementById('navBackdrop');
 
-  if (mobileMenuBtn && navMenu) {
-    mobileMenuBtn.addEventListener('click', () => {
-      const isOpen = navMenu.classList.toggle('open');
-      mobileMenuBtn.classList.toggle('open');
-      mobileMenuBtn.setAttribute('aria-expanded', isOpen);
-    });
+  function openMobileMenu() {
+    if (navMenu) navMenu.classList.add('open');
+    if (navBackdrop) navBackdrop.classList.add('open');
+    if (mobileMenuBtn) {
+      mobileMenuBtn.classList.add('open');
+      mobileMenuBtn.setAttribute('aria-expanded', 'true');
+    }
+  }
 
-    // Close on link click
-    navLinks.forEach((link) => {
-      link.addEventListener('click', () => {
-        navMenu.classList.remove('open');
-        mobileMenuBtn.classList.remove('open');
-        mobileMenuBtn.setAttribute('aria-expanded', 'false');
-      });
-    });
+  function closeMobileMenu() {
+    if (navMenu) navMenu.classList.remove('open');
+    if (navBackdrop) navBackdrop.classList.remove('open');
+    if (mobileMenuBtn) {
+      mobileMenuBtn.classList.remove('open');
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
 
-    // Close on outside click
-    document.addEventListener('click', (e) => {
-      if (!navMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-        navMenu.classList.remove('open');
-        mobileMenuBtn.classList.remove('open');
-        mobileMenuBtn.setAttribute('aria-expanded', 'false');
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (navMenu && navMenu.classList.contains('open')) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
       }
     });
   }
+
+  if (closeMobileMenuBtn) {
+    closeMobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeMobileMenu();
+    });
+  }
+
+  if (navBackdrop) {
+    navBackdrop.addEventListener('click', closeMobileMenu);
+  }
+
+  // Close menu when tapping any navigation link
+  navLinks.forEach((link) => {
+    link.addEventListener('click', closeMobileMenu);
+  });
+
+  // Close menu on desktop resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      closeMobileMenu();
+    }
+  });
 
   // ==========================================
   // 4. TYPING TEXT ANIMATION
@@ -930,6 +958,7 @@ Passion:     Building reliable software architectures, responsive web systems & 
   // Keyboard shortcut: Press ESC to close any open modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      closeMobileMenu();
       if (resumeModal && resumeModal.classList.contains('active')) hideResumeModal();
       if (projectModal && projectModal.classList.contains('active')) {
         projectModal.classList.remove('active');
